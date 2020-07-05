@@ -18,6 +18,9 @@
           <label>
             <input type="time" v-model="time">
           </label>
+          <label>
+            <input type="checkbox" v-model="done"> <span>Выполнено</span>
+          </label>
           <button type="submit">Сохранить задачу</button>
         </form>
       </div>
@@ -27,28 +30,40 @@
 </template>
 
 <script>
-  import ButtonBack from "@/components/ButtonBack"
-  import {required} from 'vuelidate/lib/validators'
+  import ButtonBack from "@/components/ButtonBack";
+  import {required} from "vuelidate/lib/validators";
   
   export default {
-    name: "NewTask",
+    name: "Task",
     data: () => ({
+      id: 0,
       title: '',
       description: '',
       tags: '',
       date: '',
       time: '',
-      status: 'inwork'
+      status: 'inwork',
+      done: false
     }),
     validations: {
       title: {required},
       date: {required}
     },
+    async mounted() {
+      this.id = this.$route.params.id
+      const task = await this.$store.dispatch('getTaskById', this.id)
+      this.title = task.title
+      this.description = task.description
+      this.tags = '#'+task.tags.join('#')
+      this.date = task.date
+      this.time = task.time
+      this.status = task.status
+      if (this.status === 'done') this.done = true
+    },
     watch: {
-      tags: function (val) {
-        let text = val.replace(/\s+/g, ' ').replace(/#+/g, ' #').trim()
-        if (text[0] !== '#') text = '#'+text
-        this.tags = text
+      done() {
+        if (this.done) this.status = 'done'
+        else this.status = 'inwork'
       }
     },
     components: {
@@ -63,6 +78,7 @@
         let tags = this.tags.replace(' ', '').split('#')
         tags.shift()
         const formData = {
+          id: +this.id,
           title: this.title,
           description: this.description,
           tags: tags,
@@ -70,8 +86,8 @@
           time: this.time,
           status: this.status
         }
-        
-        await this.$store.dispatch('addTask', formData)
+
+        await this.$store.dispatch('editTask', formData)
         await this.$router.push('/')
       }
     }
@@ -86,10 +102,10 @@
     border-radius: 20px;
     padding: 20px;
     position: relative;
-    @include grid(center, center);
+  @include grid(center, center);
   }
   .main__wrapper{
-    //margin: 40px auto 0;
+  //margin: 40px auto 0;
     display: grid;
     grid-row-gap: 20px;
   }
@@ -100,7 +116,7 @@
     padding: 20px;
     >form{
       @include grid();
-      grid-row-gap: 13px;
+        grid-row-gap: 13px;
       input,
       textarea{
         width: 100%;
@@ -139,6 +155,18 @@
         font-size: 28px;
         color: #fff;
         padding: 10px;
+      }
+      input[type="checkbox"]{
+        border: none;
+        box-shadow: none;
+        width: auto;
+        margin-top: 10px;
+      }
+      label span{
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        user-select: none;
       }
     }
   }

@@ -8,6 +8,9 @@
 
 <script>
   export default {
-    name: "Emptylayout"
+    name: "Emptylayout",
+    async mounted() {
+      if (this.$store.getters.tasks.length < 1) await this.$store.dispatch('getTasks')
+    }
   }
 </script>

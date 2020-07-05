@@ -14,6 +14,12 @@ const routes = [{
     name: 'NewTask',
     meta: {layout: 'EmptyLayout'},
     component: () => import('@/views/NewTask'),
+  },
+  {
+    path: '/task/:id',
+    name: 'task',
+    meta: {layout: 'EmptyLayout'},
+    component: () => import('@/views/Task.vue')
   }]
 
 const router = new VueRouter({
